@@ -1,54 +1,53 @@
 import {useState} from 'react';
-import { StyleSheet, Text, View, Button, TextInput } from 'react-native';
-
+import { StyleSheet, View, ScrollView, FlatList } from 'react-native';
+import GoalItem from './components/GoalItem';
+import GoalInput from './components/GoalInput';
 export default function App() {
-  const [enteredtext, setEnteredText] = useState('');
   const [goalList, setGoalList] = useState([]);
-  
-  function goalInputHandler(text) {
-    setEnteredText(text);
-  };
 
-  function addGoalHandler() {
-    setGoalList(currentGoals => [...currentGoals, enteredtext]);
+  // Since I'm using FlatList to render list of items, I need to pass the key. FlaList will automatically look for the 'key' here.
+  // function addGoalHandler() {
+  //   setGoalList(currentGoals => [...currentGoals, {text: enteredtext, key: Math.random().toString()}]);
+  // };
+
+  // But if I cannot use the name 'key' for some reasons, I can pass the key this way.
+  function addGoalHandler(enteredtext) {
+    setGoalList(currentGoals => [...currentGoals, {text: enteredtext, id: Math.random().toString()}]);
   };
 
   return (
+    // By default, View component is not scrollable.
     <View style={styles.appContainer}>
-      <View style={styles.inputContainer}>
-        <TextInput style={styles.textInput} placeholder='Add a goal' onChangeText={goalInputHandler} />
-        <Button title="Add a goal" onPress={addGoalHandler} />
-      </View> 
+      <GoalInput onAddGoal={addGoalHandler} />
+      {/* add styling here so that it can adjust the height of scrolling view. */}
       <View style={styles.goalsContainer}>
-       {goalList.map((goal) => <Text key={goal}>{goal}</Text>)}
+        {/* Scrollview renders child component at the same time, meaning it could affect performance if there are thousands of items being rendered at the same time. */}
+        {/* Scrollview is good for static size components such as news articles, but not so good for dynamic size components such as lists of items. */}
+        {/* Flatlist will render items whenever they need to be visible. When they become visible, it will be rendered lazily. */}
+        {/* Use Flalist for dynamic size of list or array or object */}
+        {/* <ScrollView alwaysBounceVertical={false}> */}
+        <FlatList data={goalList} renderItem={(itemData) => {
+          return <GoalItem text={itemData.item.text} />
+        }}
+        // if I cannot set key to 'key' I can use keyExtractor.
+        keyExtractor={(item, index) => {
+          return item.id;
+        }}
+        alwaysBounceVertical={false} />
+        {/* </ScrollView> */}
       </View>
     </View>
   );
 }
 
+// Unlike css, properties don't inherit.
 const styles = StyleSheet.create({
   appContainer: {
     flex: 1,
     paddingTop: 50,
     paddingHorizontal: 16,
   },
-  inputContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 30,
-    borderBottomWidth: 1,
-    borderBottomColor: 'gray',
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: 'lightgray',
-    width: '60%',
-    marginRight: 10,
-    padding: 8,
-  },
   goalsContainer: {
     flex: 4,
-  }
+  },
 });
