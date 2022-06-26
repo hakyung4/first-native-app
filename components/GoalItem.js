@@ -22,6 +22,7 @@ const styles = StyleSheet.create({
   goalText: {
     color: 'black',
     padding: 8,
+    fontWeight: '700',
   },
   pressedItem: {
     backgroundColor: 'gray',
